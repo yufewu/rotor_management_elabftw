@@ -1,0 +1,19 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Streamlit configurations
+.streamlit
+
+# user-defined files
+data/
+test/
+test.py
+roadmap.md

@@ -1,0 +1,1 @@
+status_list = ["Empty", "Borrowed", "Crashed/Broken/Missing", "Reference"]
