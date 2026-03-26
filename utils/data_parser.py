@@ -26,7 +26,9 @@ def flatten_rotor_data(data_json: dict) -> dict:
         "tags": data_json.get("tags", []),
     }
     
-    metadata = parse_metadata(data_json.get("metadata"))   # data_json.get("metadata") returns metadata_raw as a json string, and then gets parsed into a python dictionary
+    metadata_raw = data_json.get("metadata")
+    assert isinstance(metadata_raw, str)
+    metadata = parse_metadata(metadata_raw)   # data_json.get("metadata") returns metadata_raw as a json string, and then gets parsed into a python dictionary
     metadata_extra_fields = metadata.get("extra_fields", {})
     
     target_fields = ["Rotor number", "Status", "Owner", "Sample name", "Location", "Date", "Note"]
