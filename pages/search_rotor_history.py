@@ -3,6 +3,7 @@ import pandas as pd
 import io
 import json
 from api_services.rotor_manager import get_all_rotors, get_single_rotor
+from utils.supporting_data import HEADER, END_TAG
 
 
 @st.cache_data(ttl=60)
@@ -13,9 +14,6 @@ def fetch_rotors_cached(category_id):
 st.set_page_config(page_title="Rotor history", page_icon="🕰️")
 st.title("🕰️ Search history by rotor number")
 RESOURCE_CATEGORY_ID = st.secrets["ELAB_RESOURCE_CATEGORY_ID"]
-
-START_TAG = "<p>--------------------------</p>"
-END_TAG = "<p>**************************</p>"
 
 
 # Fetch all existing rotors
@@ -55,8 +53,8 @@ if rotor_number:
         
         st.divider()
         
-        if START_TAG in body and END_TAG in body:
-            csv_raw_text = body.split(START_TAG)[1].split(END_TAG)[0]
+        if HEADER in body and END_TAG in body:
+            csv_raw_text = f"{HEADER}\n" + body.split(HEADER)[1].split(END_TAG)[0]
             
             clean_csv_text = csv_raw_text.replace("<pre>", "").replace("</pre>", "").strip()
             
@@ -69,7 +67,7 @@ if rotor_number:
                 
                 st.dataframe(
                     df_history, 
-                    use_container_width=True, 
+                    width='stretch', 
                     hide_index=True
                 )
                 

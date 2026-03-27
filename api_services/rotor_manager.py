@@ -4,6 +4,7 @@ import io
 from datetime import datetime
 from api_services.client import get_shared_items_api_client
 from utils.data_parser import flatten_rotor_data
+from utils.supporting_data import HEADER, END_TAG
 
 
 def get_single_item(item_id: int) -> dict:
@@ -65,10 +66,10 @@ def get_all_rotors(category_id: int) -> list[dict]:
         raise e
 
 
-def _append_csv_log(current_body: str, form_data: dict) -> str:
+def _append_csv_log(current_body: str, form_data: dict, override_timestamp: bool) -> str:
     """Internal function: Generate a new body containing CSV logs"""
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
+    timestamp = form_data.get("Date", "") if override_timestamp else datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     note = str(form_data.get("Note", "")).replace('\n', ' ')
     
     row = [
@@ -86,22 +87,14 @@ def _append_csv_log(current_body: str, form_data: dict) -> str:
     writer.writerow(row)
     csv_line = output.getvalue().strip()
     
-    START_TAG = "<p>--------------------------</p>"
-    END_TAG = "<p>**************************</p>"
-    
-    # 3. 插入逻辑
-    if START_TAG in current_body and END_TAG in current_body:
-        # 如果已经存在日志区块，通过字符串替换，在结束标签前插入新行
-        new_body = current_body.replace(END_TAG, f"{csv_line}\n{END_TAG}")
+    if HEADER in current_body and END_TAG in current_body:
+        new_body = current_body.replace(HEADER, f"{HEADER}\n{csv_line}")
     else:
-        # 如果是第一次写入，创建完整的 HTML 结构（使用 <pre> 让它在网页上显示整齐）
-        header = "Timestamp,Owner,Status,Sample name,Location,Note,Date"
         log_block = f"""
 <hr>
 <p><strong>Update history:</strong></p>
-{START_TAG}
 <pre>
-{header}
+{HEADER}
 {csv_line}
 {END_TAG}
 </pre>
@@ -111,7 +104,7 @@ def _append_csv_log(current_body: str, form_data: dict) -> str:
     return new_body
 
 
-def create_rotor(new_data: dict, category_id: int) -> dict:
+def create_rotor(new_data: dict, category_id: int, override_timestamp: bool = False) -> dict:
     """
     Create a new Rotor in eLabFTW.
     new_data: A dictionary containing all fields.
@@ -135,7 +128,7 @@ def create_rotor(new_data: dict, category_id: int) -> dict:
         for key, value in new_data.items():
             metadata["extra_fields"][key] = {"value": value, "type": "text"}
         
-        updated_body = _append_csv_log("", new_data)
+        updated_body = _append_csv_log("", new_data, override_timestamp)
             
         rotor_number = new_data.get("Rotor number", "New Rotor")
         
@@ -146,14 +139,14 @@ def create_rotor(new_data: dict, category_id: int) -> dict:
         }
         _api_response = api_instance.patch_item(patch_body, new_id)
         
-        return {"success": True, "message": f"Creation successful! Rotor #{rotor_number} has been generated. (Backend ID: {new_id})"}
+        return {"success": True, "message": f"Creation successful! Rotor #{rotor_number} has been generated. (Backend ID: {new_id})", "new_id": new_id}
 
     except Exception as e:
         print(f"Create failed: {e}")
         return {"success": False, "message": str(e)}
 
 
-def update_rotor(item_id: int, new_data: dict) -> dict:
+def update_rotor(item_id: int, new_data: dict, override_timestamp: bool = False) -> dict:
     """
     Update the Rotor data with the specified ID.
     """
@@ -164,7 +157,7 @@ def update_rotor(item_id: int, new_data: dict) -> dict:
         current_data = json.loads(current_item.data.decode("utf-8"))
 
         current_body = current_data.get("body", "")
-        updated_body = _append_csv_log(current_body, new_data)
+        updated_body = _append_csv_log(current_body, new_data, override_timestamp)
         
         metadata = json.loads(current_data.get("metadata", "{}"))
         if "extra_fields" not in metadata:
