@@ -22,8 +22,7 @@ RESOURCE_CATEGORY_ID = st.secrets["ELAB_RESOURCE_CATEGORY_ID"]
 ODS_FILE = parse_args().filename
 df = pd.read_excel(ODS_FILE, engine="odf")
 
-df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
-df['Date'] = df['Date'].fillna("")
+df['Date_str'] = df['Date'].dt.strftime("%Y-%m-%d").fillna("")
 df = df.sort_values(by='Date', ascending=True)
 
 df['Status'] = df['Status'].fillna("Borrowed")
@@ -61,7 +60,7 @@ for index, row in df.iterrows():
                 "Location": str(row.get("Location", "")),
                 "Sample name": str(row.get("Sample name", "")),
                 "Note": str(row.get("Note", "")),
-                "Date": row['Date'].strftime("%Y-%m-%d")
+                "Date": row['Date_str']
             }
     
     print(f"Migrating [{index}/{len(df)}] Rotor {rotor_number}...")
