@@ -24,6 +24,7 @@ def flatten_rotor_data(data_json: dict) -> dict:
         "id": data_json.get("id"),
         "title": data_json.get("title"),
         "tags": data_json.get("tags", []),
+        "body": data_json.get("body"),
     }
     
     metadata_raw = data_json.get("metadata")

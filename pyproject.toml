@@ -10,3 +10,8 @@ dependencies = [
     "pandas>=2.3.3",
     "streamlit>=1.55.0",
 ]
+
+[dependency-groups]
+dev = [
+    "odfpy>=1.4.1",
+]

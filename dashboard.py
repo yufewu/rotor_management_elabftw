@@ -8,26 +8,25 @@ def fetch_rotors_cached(category_id):
     return get_all_rotors(category_id)
 
 
-def refresh_database(category_id):
+def refresh_database(category_id: int) -> pd.DataFrame:
     try:
         with st.spinner("Fetching data from eLabFTW..."):
             all_rotors = fetch_rotors_cached(category_id)
             st.session_state.all_rotors = all_rotors
 
-        if all_rotors:
-            df = pd.DataFrame(all_rotors)
-            
-            cols = ["Rotor number", "Status", "Owner", "Sample name", "Location", "Note", "Date"]
-            df = df[cols]
-            st.session_state.all_rotors_df = df
-            
-            st.dataframe(df, width='stretch', hide_index=True)
-
-        else:
-            st.info("There is currently no data in the database.")
-
+        if not all_rotors:
+            raise ValueError("There is currently no data in the database.")
+        
+        df = pd.DataFrame(all_rotors)
+        
+        cols = ["Rotor number", "Status", "Owner", "Sample name", "Location", "Note", "Date"]
+        df = df[cols]
+        
+        return df
+        
     except Exception as e:
         st.error(f"Unable to load data: {e}")
+        return pd.DataFrame()
 
 RESOURCE_CATEGORY_ID = st.secrets["ELAB_RESOURCE_CATEGORY_ID"]
 
@@ -40,4 +39,20 @@ with col2:
         fetch_rotors_cached.clear()
         st.rerun()
 
-refresh_database(category_id=RESOURCE_CATEGORY_ID)
+df = refresh_database(category_id=RESOURCE_CATEGORY_ID)
+st.session_state.all_rotors_df = df
+
+user_names = sorted(df['Owner'].unique().tolist())
+
+selected_owner = st.selectbox(
+    "Filter by Owner: ",
+    options=["all"] + user_names
+)
+
+if selected_owner == "all":
+    filtered_df = df
+else:
+    filtered_df = df[df['Owner'] == selected_owner]
+
+st.write(f"### Found {len(filtered_df)} rotors. ")
+st.dataframe(filtered_df, width='stretch', hide_index=True)

@@ -128,11 +128,10 @@ Special care is required for handling **double JSON serialization**.
 
 ### Phase 4: Logging & History *(In Progress)*
 
-* [ ] Initialize local logging database (`SQLite` or `CSV`)
-* [ ] Implement logging utility (`history_logger.py`)
-* [ ] Extend update workflow with logging hook
-* [ ] Build Global Logs page
-* [ ] Build Rotor History page
+* [x] Implement logging utility (`history_logger.py`)
+* [x] Extend update workflow with logging hook
+* [x] Build Global Logs page
+* [x] Build Rotor History page
 
 ---
 
