@@ -1,4 +1,7 @@
 import json
+import csv
+import io
+from datetime import datetime
 from api_services.client import get_shared_items_api_client
 from utils.data_parser import flatten_rotor_data
 
@@ -62,7 +65,53 @@ def get_all_rotors(category_id: int) -> list[dict]:
         raise e
 
 
-def create_rotor(new_data: dict, category_id: int):
+def _append_csv_log(current_body: str, form_data: dict) -> str:
+    """Internal function: Generate a new body containing CSV logs"""
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    note = str(form_data.get("Note", "")).replace('\n', ' ')
+    
+    row = [
+        timestamp, 
+        form_data.get("Owner", ""), 
+        form_data.get("Status", ""), 
+        form_data.get("Sample name", ""), 
+        form_data.get("Location", ""), 
+        note, 
+        form_data.get("Date", ""), 
+    ]
+    
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(row)
+    csv_line = output.getvalue().strip()
+    
+    START_TAG = "<p>--------------------------</p>"
+    END_TAG = "<p>**************************</p>"
+    
+    # 3. 插入逻辑
+    if START_TAG in current_body and END_TAG in current_body:
+        # 如果已经存在日志区块，通过字符串替换，在结束标签前插入新行
+        new_body = current_body.replace(END_TAG, f"{csv_line}\n{END_TAG}")
+    else:
+        # 如果是第一次写入，创建完整的 HTML 结构（使用 <pre> 让它在网页上显示整齐）
+        header = "Timestamp,Owner,Status,Sample name,Location,Note,Date"
+        log_block = f"""
+<hr>
+<p><strong>Update history:</strong></p>
+{START_TAG}
+<pre>
+{header}
+{csv_line}
+{END_TAG}
+</pre>
+"""
+        new_body = current_body + log_block
+        
+    return new_body
+
+
+def create_rotor(new_data: dict, category_id: int) -> dict:
     """
     Create a new Rotor in eLabFTW.
     new_data: A dictionary containing all fields.
@@ -85,14 +134,17 @@ def create_rotor(new_data: dict, category_id: int):
         metadata = {"extra_fields": {}}
         for key, value in new_data.items():
             metadata["extra_fields"][key] = {"value": value, "type": "text"}
+        
+        updated_body = _append_csv_log("", new_data)
             
         rotor_number = new_data.get("Rotor number", "New Rotor")
         
         patch_body = {
-            "title": f"Rotor #{rotor_number}", # 设置一个规范的标题
-            "metadata": json.dumps(metadata)
+            "title": f"Rotor #{rotor_number}",
+            "body": updated_body, 
+            "metadata": json.dumps(metadata), 
         }
-        api_instance.patch_item(patch_body, new_id)
+        _api_response = api_instance.patch_item(patch_body, new_id)
         
         return {"success": True, "message": f"Creation successful! Rotor #{rotor_number} has been generated. (Backend ID: {new_id})"}
 
@@ -110,6 +162,9 @@ def update_rotor(item_id: int, new_data: dict) -> dict:
     try:
         current_item = api_instance.get_item(item_id, _preload_content=False)
         current_data = json.loads(current_item.data.decode("utf-8"))
+
+        current_body = current_data.get("body", "")
+        updated_body = _append_csv_log(current_body, new_data)
         
         metadata = json.loads(current_data.get("metadata", "{}"))
         if "extra_fields" not in metadata:
@@ -123,9 +178,12 @@ def update_rotor(item_id: int, new_data: dict) -> dict:
 
         updated_metadata_str = json.dumps(metadata)
 
-        body = {"metadata": updated_metadata_str}
+        patch_body = {
+            "metadata": updated_metadata_str, 
+            "body": updated_body, 
+            }
         
-        api_response = api_instance.patch_item(body, item_id)
+        _api_response = api_instance.patch_item(patch_body, item_id)
         
         return {"success": True, "message": f"Item {item_id} updated"}
 
