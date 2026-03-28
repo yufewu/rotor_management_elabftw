@@ -1,8 +1,9 @@
 import time
 import streamlit as st
 from datetime import datetime
-from api_services.rotor_manager import get_all_rotors, update_rotor, create_rotor
-from utils.supporting_data import status_list
+from api_services.rotor_manager import Rotor
+from utils.supporting_data import STATUS_OPTIONS
+from typing import Literal
 
 
 if "needs_reset" not in st.session_state:
@@ -52,11 +53,14 @@ try:
         if 'all_rotors' in st.session_state:
             all_rotors = st.session_state.all_rotors
         else:
-            all_rotors = get_all_rotors(RESOURCE_CATEGORY_ID)
+            rotor_instances = Rotor.get_all(RESOURCE_CATEGORY_ID)
+            all_rotors = [rotor.get_rotor() for rotor in rotor_instances]
+            st.session_state.all_rotors = all_rotors
 
+    rotor_instances = Rotor.get_all(RESOURCE_CATEGORY_ID)
     rotor_dict = {
-        str(r.get("Rotor number")).strip(): r 
-        for r in all_rotors if r.get("Rotor number") and r.get("Rotor number") != "N/A"
+        str(r.get_rotor().get("Rotor number")).strip(): r for r in rotor_instances
+        if r.get_rotor().get("Rotor number") and r.get_rotor().get("Rotor number") != "N/A"
     }
     
 except Exception as e:
@@ -78,34 +82,34 @@ if rotor_number:
     is_existing = rotor_number in rotor_dict
     
     if is_existing:
-        target_rotor = rotor_dict[rotor_number]
-        target_id = target_rotor["id"]
-
+        target_rotor_data = rotor_dict[rotor_number].get_rotor()
+        target_id = int(target_rotor_data["id"])
     else:
         target_rotor = None
+        target_rotor_data = None
         target_id = None
         st.info(f"Rotor number does not exist. You are creating a new one...")
 
     st.divider()
 
     with st.form("rotor_form"):
-        init_status = target_rotor.get("Status", "") if target_rotor else FORM_FIELDS["status"]
-        init_owner = target_rotor.get("Owner", "") if target_rotor else FORM_FIELDS["owner"]
+        init_status = target_rotor_data.get("Status", "") if target_rotor_data else FORM_FIELDS["status"]
+        init_owner = target_rotor_data.get("Owner", "") if target_rotor_data else FORM_FIELDS["owner"]
         init_date = FORM_FIELDS["date"]
-        init_location = target_rotor.get("Location", "") if target_rotor else FORM_FIELDS["location"]
-        init_sample = target_rotor.get("Sample name", "") if target_rotor else FORM_FIELDS["sample_name"]
-        init_note = target_rotor.get("Note", "") if target_rotor else FORM_FIELDS["note"]
+        init_location = target_rotor_data.get("Location", "") if target_rotor_data else FORM_FIELDS["location"]
+        init_sample = target_rotor_data.get("Sample name", "") if target_rotor_data else FORM_FIELDS["sample_name"]
+        init_note = target_rotor_data.get("Note", "") if target_rotor_data else FORM_FIELDS["note"]
 
         st.subheader(f"Rotor #{rotor_number}")
 
         try:
-            status_idx = status_list.index(st.session_state.status)
+            status_idx = STATUS_OPTIONS.index(st.session_state.status)
         except ValueError:
             status_idx = 1
 
         col1, col2 = st.columns(2)
         with col1:
-            st.selectbox("Status", options=status_list, index=status_idx, key="status")
+            st.selectbox("Status", options=STATUS_OPTIONS, index=status_idx, key="status")
             st.date_input("Date", value=init_date, key="date")
             st.text_input("Owner", value=init_owner, key="owner", help="Mandatory")
         with col2:
@@ -125,23 +129,25 @@ if rotor_number:
             for error in errors:
                 st.error(error)
 
-        else: 
-            form_data = {
-                "Rotor number": st.session_state.rotor_num,
-                "Status": st.session_state.status,
-                "Date": date_str,
-                "Owner": st.session_state.owner,
-                "Location": st.session_state.location,
-                "Sample name": st.session_state.sample_name,
-                "Note": st.session_state.note, 
+        else:
+            # Convert form data to new OOP format
+            form_data: dict[str, dict[Literal["value", "type", "options"], str | list]] = {
+                "Rotor number": {"value": st.session_state.rotor_num, "type": "text"},
+                "Status": {"value": st.session_state.status, "type": "select", "options": STATUS_OPTIONS},
+                "Date": {"value": date_str, "type": "date"},
+                "Owner": {"value": st.session_state.owner, "type": "text"},
+                "Location": {"value": st.session_state.location, "type": "text"},
+                "Sample name": {"value": st.session_state.sample_name, "type": "text"},
+                "Note": {"value": st.session_state.note, "type": "text"}, 
             }
             
             with st.spinner("Synchronizing..."):
                 if is_existing:
                     assert target_id is not None
-                    res = update_rotor(target_id, form_data)
+                    rotor = Rotor(target_id)
+                    res = rotor.update(form_data)
                 else:
-                    res = create_rotor(form_data, category_id = st.secrets["ELAB_RESOURCE_CATEGORY_ID"]) 
+                    res = Rotor.create(form_data, category_id=st.secrets["ELAB_RESOURCE_CATEGORY_ID"]) 
                     
             if res["success"]:
                 st.success(f"Success! Rotor #{rotor_number} has been updated. ")

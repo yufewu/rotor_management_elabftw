@@ -1,6 +1,6 @@
 # 🧪 Rotor Management System
 
-> A simple and intuitive web-based application for managing laboratory inventories (solid-state NMR rotors) integrated with eLabFTW.
+> A simple and intuitive web-based application for managing laboratory inventories (solid-state NMR rotors) integrated with eLabFTW as backend database.
 
 ---
 

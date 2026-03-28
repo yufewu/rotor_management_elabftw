@@ -1,14 +1,14 @@
 import streamlit as st
 import pandas as pd
 import io
-import json
-from api_services.rotor_manager import get_all_rotors, get_single_rotor
+from api_services.rotor_manager import Rotor
 from utils.supporting_data import HEADER, END_TAG
 
 
 @st.cache_data(ttl=60)
 def fetch_rotors_cached(category_id):
-    return get_all_rotors(category_id)
+    rotor_instances = Rotor.get_all(category_id)
+    return [rotor.get_rotor() for rotor in rotor_instances]
 
 
 st.set_page_config(page_title="Rotor history", page_icon="🕰️")
@@ -19,14 +19,15 @@ RESOURCE_CATEGORY_ID = st.secrets["ELAB_RESOURCE_CATEGORY_ID"]
 # Fetch all existing rotors
 try:
     with st.spinner("Fetching existing rotor information..."):
-        if 'all_rotors' in st.session_state:
-            all_rotors = st.session_state.all_rotors
+        if 'rotor_instances' in st.session_state:
+            rotor_instances = st.session_state.rotor_instances
         else:
-            all_rotors = fetch_rotors_cached(RESOURCE_CATEGORY_ID)
+            rotor_instances = Rotor.get_all(RESOURCE_CATEGORY_ID)
+            st.session_state.rotor_instances = rotor_instances
 
     rotor_dict = {
-        str(r.get("Rotor number")).strip(): r 
-        for r in all_rotors if r.get("Rotor number") and r.get("Rotor number") != "N/A"
+        str(r.get_rotor().get("Rotor number")).strip(): r for r in rotor_instances
+        if r.get_rotor().get("Rotor number") and r.get_rotor().get("Rotor number") != "N/A"
     }
     
 except Exception as e:
@@ -45,10 +46,11 @@ rotor_number = input.strip()
 # Pull rotor history and parse
 if rotor_number:    
     if rotor_number in rotor_dict:
-        target_id = rotor_dict[rotor_number]["id"]
+        target_rotor = rotor_dict[rotor_number]
+        target_id = int(target_rotor.get_rotor()["id"])
 
         with st.spinner("Getting history..."):
-            rotor_data = get_single_rotor(target_id)
+            rotor_data = target_rotor.get_raw_data()
             body = rotor_data.get("body", "")
         
         st.divider()

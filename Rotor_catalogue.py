@@ -1,11 +1,12 @@
 import streamlit as st
 import pandas as pd
-from api_services.rotor_manager import get_all_rotors
+from api_services.rotor_manager import Rotor
 
 
 @st.cache_data(ttl=60)
 def fetch_rotors_cached(category_id):
-    return get_all_rotors(category_id)
+    rotors = Rotor.get_all(category_id)
+    return [rotor.get_rotor() for rotor in rotors]
 
 
 def refresh_database(category_id: int) -> pd.DataFrame:
