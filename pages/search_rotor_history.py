@@ -7,8 +7,8 @@ from utils.supporting_data import HEADER, END_TAG
 
 @st.cache_data(ttl=60)
 def fetch_rotors_cached(category_id):
-    rotor_instances = Rotor.get_all(category_id)
-    return [rotor.get_rotor() for rotor in rotor_instances]
+    rotors = Rotor.get_all(category_id)
+    return rotors
 
 
 st.set_page_config(page_title="Rotor history", page_icon="🕰️")
@@ -19,15 +19,16 @@ RESOURCE_CATEGORY_ID = st.secrets["ELAB_RESOURCE_CATEGORY_ID"]
 # Fetch all existing rotors
 try:
     with st.spinner("Fetching existing rotor information..."):
-        if 'rotor_instances' in st.session_state:
-            rotor_instances = st.session_state.rotor_instances
-        else:
-            rotor_instances = Rotor.get_all(RESOURCE_CATEGORY_ID)
-            st.session_state.rotor_instances = rotor_instances
+        all_rotors = fetch_rotors_cached("ELAB_RESOURCE_CATEGORY_ID")
+        st.session_state.all_rotors = all_rotors
+
+        if 'all_rotors_list' not in st.session_state:
+            all_rotors_list = all_rotors_list = [r.information for r in st.session_state.all_rotors]
+            st.session_state.all_rotors_list = all_rotors_list
 
     rotor_dict = {
-        str(r.get_rotor().get("Rotor number")).strip(): r for r in rotor_instances
-        if r.get_rotor().get("Rotor number") and r.get_rotor().get("Rotor number") != "N/A"
+        str(r.get("Rotor number")).strip(): r for r in st.session_state.all_rotors_list
+        if r.get("Rotor number") and r.get("Rotor number") != "N/A"
     }
     
 except Exception as e:
@@ -47,10 +48,10 @@ rotor_number = input.strip()
 if rotor_number:    
     if rotor_number in rotor_dict:
         target_rotor = rotor_dict[rotor_number]
-        target_id = int(target_rotor.get_rotor()["id"])
+        target_id = int(target_rotor["id"])
 
         with st.spinner("Getting history..."):
-            rotor_data = target_rotor.get_raw_data()
+            rotor_data = Rotor(target_id).get_raw_data()
             body = rotor_data.get("body", "")
         
         st.divider()
@@ -65,7 +66,10 @@ if rotor_number:
                 if "Timestamp" in df_history.columns:
                     df_history = df_history.sort_values(by="Timestamp", ascending=False)
                 
-                st.success(f"Obtained {len(df_history)} history entries. ")
+                if len(df_history) == 1:
+                    st.success(f"Obtained 1 history record. ")
+                else:
+                    st.success(f"Obtained {len(df_history)} history records. ")
                 
                 st.dataframe(
                     df_history, 

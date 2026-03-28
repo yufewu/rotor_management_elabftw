@@ -16,6 +16,7 @@ class Rotor:
     item_id: int
     _response_data: dict = field(init=False, default_factory=dict)
     _parsed_metadata: dict = field(init=False, default_factory=dict)
+    information: dict = field(init=False, default_factory=dict)
     
 
     def get_raw_data(self) -> dict:
@@ -37,8 +38,9 @@ class Rotor:
         """
         if not self._response_data:
             self.get_raw_data()
+        self.information = interpret_rotor_response(self._response_data)
         
-        return interpret_rotor_response(self._response_data)
+        return self.information
     
     
     def update(self, 
@@ -229,7 +231,9 @@ class Rotor:
                 if rotor_information.get("Rotor number") != "N/A":
                     rotor_id = item.get("id")
                     if rotor_id:
-                        rotors.append(cls(rotor_id))
+                        rotor = cls(rotor_id)
+                        rotor.information = rotor_information
+                        rotors.append(rotor)
                     
             return rotors
 

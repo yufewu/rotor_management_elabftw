@@ -50,17 +50,17 @@ with st.sidebar:
 # Fetch all existing rotors
 try:
     with st.spinner("Fetching existing rotor information..."):
-        if 'all_rotors' in st.session_state:
-            all_rotors = st.session_state.all_rotors
-        else:
-            rotor_instances = Rotor.get_all(RESOURCE_CATEGORY_ID)
-            all_rotors = [rotor.get_rotor() for rotor in rotor_instances]
+        if 'all_rotors' not in st.session_state:
+            all_rotors = Rotor.get_all(RESOURCE_CATEGORY_ID)
             st.session_state.all_rotors = all_rotors
+        if 'all_rotors_list' not in st.session_state:
+            all_rotors_list = [r.information for r in st.session_state.all_rotors]
+            st.session_state.all_rotors_list = all_rotors_list
 
-    rotor_instances = Rotor.get_all(RESOURCE_CATEGORY_ID)
+
     rotor_dict = {
-        str(r.get_rotor().get("Rotor number")).strip(): r for r in rotor_instances
-        if r.get_rotor().get("Rotor number") and r.get_rotor().get("Rotor number") != "N/A"
+        str(r.get("Rotor number")).strip(): r for r in st.session_state.all_rotors_list
+        if r.get("Rotor number") and r.get("Rotor number") != "N/A"
     }
     
 except Exception as e:
@@ -82,7 +82,7 @@ if rotor_number:
     is_existing = rotor_number in rotor_dict
     
     if is_existing:
-        target_rotor_data = rotor_dict[rotor_number].get_rotor()
+        target_rotor_data = rotor_dict[rotor_number]
         target_id = int(target_rotor_data["id"])
     else:
         target_rotor = None
