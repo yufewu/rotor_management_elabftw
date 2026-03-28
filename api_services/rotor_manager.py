@@ -71,7 +71,7 @@ class Rotor:
 
             for key, value in new_rotor_information.items():
                 if key in metadata["extra_fields"]:
-                    metadata["extra_fields"][key]["value"] = value
+                    metadata["extra_fields"][key]["value"] = value["value"]
                 else:
                     metadata["extra_fields"][key] = {"value": value["value"], "type": value["type"]}
                     if key == "Status":
@@ -171,7 +171,7 @@ class Rotor:
         try:
             post_body = {
                 "category": category_id,
-                "canread_base": 20, 
+                "canread_base": 30, 
                 "canwrite_base": 10, 
                 }
             response: ApiResponse = api_instance.post_item(body=post_body, _preload_content=False)  # type: ignore
@@ -190,7 +190,7 @@ class Rotor:
                     metadata["extra_fields"][key]["options"] = STATUS_OPTIONS
             
             updated_body = cls._append_csv_log("", new_data, override_timestamp)
-            rotor_number = new_data.get("Rotor number", "New Rotor")
+            rotor_number = new_data.get("Rotor number", {}).get("value", "New Rotor")
             patch_body = {
                 "title": f"Rotor #{rotor_number}",
                 "body": updated_body, 
@@ -198,7 +198,7 @@ class Rotor:
             }
             _api_response: ApiResponse = api_instance.patch_item(patch_body, new_id)  # type: ignore
             
-            return {"success": True, "message": f"Creation successful! Rotor #{rotor_number} has been generated. (Backend ID: {new_id})", "rotor": cls(new_id)}
+            return {"success": True, "message": f"Creation successful! Rotor #{rotor_number} has been generated. (Backend ID: {new_id})", "rotor": cls(new_id), "new_id": new_id}
 
         except Exception as e:
             print(f"Create failed: {e}")

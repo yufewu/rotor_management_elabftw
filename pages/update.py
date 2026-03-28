@@ -130,7 +130,6 @@ if rotor_number:
                 st.error(error)
 
         else:
-            # Convert form data to new OOP format
             form_data: dict[str, dict[Literal["value", "type", "options"], str | list]] = {
                 "Rotor number": {"value": st.session_state.rotor_num, "type": "text"},
                 "Status": {"value": st.session_state.status, "type": "select", "options": STATUS_OPTIONS},
@@ -147,7 +146,7 @@ if rotor_number:
                     rotor = Rotor(target_id)
                     res = rotor.update(form_data)
                 else:
-                    res = Rotor.create(form_data, category_id=st.secrets["ELAB_RESOURCE_CATEGORY_ID"]) 
+                    res = Rotor.create(form_data, st.secrets["ELAB_RESOURCE_CATEGORY_ID"]) 
                     
             if res["success"]:
                 st.success(f"Success! Rotor #{rotor_number} has been updated. ")

@@ -16,7 +16,7 @@ def get_items_api_client():
         #configuration.api_key['api_key'] = API_KEY
         configuration.api_key['Authorization'] = API_KEY
         configuration.host = API_HOST
-        configuration.debug = True
+        configuration.debug = False
         
         api_client = elabapi_python.ApiClient(configuration)
         #api_client.set_default_header(header_name="Authorization", header_value=API_KEY)
