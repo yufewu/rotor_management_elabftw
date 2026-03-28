@@ -42,7 +42,7 @@ class Rotor:
     
     
     def update(self, 
-               new_rotor_information: dict[str, dict[str, Literal["text", "date", "select", "options"]]], 
+               new_rotor_information: dict[str, dict[Literal["value", "type", "options"], str | list]], 
                override_timestamp: bool = False
                ) -> dict:
         """
@@ -95,12 +95,12 @@ class Rotor:
     
     @staticmethod
     def _append_csv_log(current_body: str, 
-                        new_rotor_information: dict[str, dict[str, Literal["text", "date", "select", "options"]]], 
+                        new_rotor_information: dict[str, dict[Literal["value", "type", "options"], str | list]], 
                         override_timestamp: bool
                         ) -> str:
         """Generate a new body containing CSV logs"""
         
-        
+
         def get_value(data: dict, key: str, default: str = "") -> str:
             item = data.get(key, {})
             if isinstance(item, dict):
@@ -149,7 +149,7 @@ class Rotor:
 
     @classmethod
     def create(cls, 
-               new_data: dict[str, dict[str, Literal["text", "date", "select", "options"]]], 
+               new_data: dict[str, dict[Literal["value", "type", "options"], str | list]], 
                category_id: int, 
                override_timestamp: bool = False
                ) -> dict:
@@ -196,7 +196,7 @@ class Rotor:
             }
             _api_response: ApiResponse = api_instance.patch_item(patch_body, new_id)  # type: ignore
             
-            return {"success": True, "message": f"Creation successful! Rotor #{rotor_number} has been generated. (Backend ID: {new_id})", "new_id": new_id}
+            return {"success": True, "message": f"Creation successful! Rotor #{rotor_number} has been generated. (Backend ID: {new_id})", "rotor": cls(new_id)}
 
         except Exception as e:
             print(f"Create failed: {e}")
