@@ -1,41 +1,40 @@
 import json
 
 
-def parse_metadata(metadata_raw: str) -> dict:
+def parse_data(data_raw: str | None) -> dict:
     """
-    Parses the raw metadata string from eLabFTW into a dictionary.
+    Parses the raw data string from eLabFTW API response into a dictionary.
     Handles NoneType and JSON formatting errors.
     """
-    if not metadata_raw or not isinstance(metadata_raw, str):
+    if not data_raw or not isinstance(data_raw, str):
         return {}
     
     try:
-        return json.loads(metadata_raw)
+        return json.loads(data_raw)
     except json.JSONDecodeError:
         return {}
 
 
-def flatten_rotor_data(data_json: dict) -> dict:
+def interpret_rotor_response(parsed_response_data: dict) -> dict:
     """
     Pass in the complete dictionary of a single item returned by the API.
-    Output a "flattened" clean dictionary that directly extracts the values from `extra_fields`.
+    Output a "interpreted" clean dictionary that directly extracts the values from `extra_fields`.
     """
     result = {
-        "id": data_json.get("id"),
-        "title": data_json.get("title"),
-        "tags": data_json.get("tags", []),
-        "body": data_json.get("body"),
+        "id": parsed_response_data.get("id"),
+        "title": parsed_response_data.get("title"),
+        "tags": parsed_response_data.get("tags", []),
+        "body": parsed_response_data.get("body"),
     }
     
-    metadata_raw = data_json.get("metadata")
-    assert isinstance(metadata_raw, str)
-    metadata = parse_metadata(metadata_raw)   # data_json.get("metadata") returns metadata_raw as a json string, and then gets parsed into a python dictionary
-    metadata_extra_fields = metadata.get("extra_fields", {})
+    _raw_metadata = parsed_response_data.get("metadata")
+    _parsed_metadata = parse_data(_raw_metadata)   # parsed_response_data.get("metadata") returns metadata_raw as a json string, and then gets parsed into a python dictionary
+    _rotor_information = _parsed_metadata.get("extra_fields", {})
     
     target_fields = ["Rotor number", "Status", "Owner", "Sample name", "Location", "Date", "Note"]
     
     for field in target_fields:
-        field_data = metadata_extra_fields.get(field, {})
+        field_data = _rotor_information.get(field, {})
         result[field] = field_data.get("value", "")
         
     return result
