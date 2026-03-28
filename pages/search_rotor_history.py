@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import io
 from api_services.rotor_manager import Rotor
+from utils.data_parser import real_name
 from utils.supporting_data import HEADER, END_TAG
 
 
@@ -63,6 +64,8 @@ if rotor_number:
             
             try:
                 df_history = pd.read_csv(io.StringIO(clean_csv_text))
+                df_history['Owner'] = df_history['Owner'].apply(real_name)
+                
                 if "Timestamp" in df_history.columns:
                     df_history = df_history.sort_values(by="Timestamp", ascending=False)
                 
