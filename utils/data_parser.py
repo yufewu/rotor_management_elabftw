@@ -1,5 +1,42 @@
 import json
+import tomllib
+from pathlib import Path
 
+
+def get_username_translator() -> dict[str, str]:
+    toml_path = Path(__file__).parent.parent / ".streamlit" / "secrets.toml"
+
+    with open(toml_path, "rb") as f:
+        config = tomllib.load(f)
+    
+    translator = {}
+    
+    alias_groups = ["group_members", "former_members", "students"]
+    for group in alias_groups:
+        group_data = config.get(group, {})
+        for real_name, aliases in group_data.items():
+            translator[real_name] = real_name
+            for alias in aliases:
+                translator[alias] = real_name
+                
+    return translator
+
+
+_translator = get_username_translator()
+
+
+def real_name(input):
+    if not input:
+        return input
+    
+    input_lower = input.strip().lower()
+
+    for alias in _translator.keys():
+        if input_lower.startswith(alias):
+            return _translator[alias]
+        
+    return input_lower
+    
 
 def parse_data(data_raw: str | None) -> dict:
     """
@@ -35,6 +72,11 @@ def interpret_rotor_response(parsed_response_data: dict) -> dict:
     
     for field in target_fields:
         field_data = _rotor_information.get(field, {})
-        result[field] = field_data.get("value", "")
+        value = field_data.get("value", "")
+
+        if field == "Owner":
+            result[field] = real_name(value)
+        else: 
+            result[field] = value
         
     return result
