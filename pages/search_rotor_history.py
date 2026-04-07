@@ -24,7 +24,7 @@ try:
         st.session_state.all_rotors = all_rotors
 
         if 'all_rotors_list' not in st.session_state:
-            all_rotors_list = all_rotors_list = [r.information for r in st.session_state.all_rotors]
+            all_rotors_list = [r.information for r in st.session_state.all_rotors]
             st.session_state.all_rotors_list = all_rotors_list
 
     rotor_dict = {
