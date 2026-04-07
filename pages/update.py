@@ -2,7 +2,7 @@ import time
 import streamlit as st
 from datetime import datetime
 from api_services.rotor_manager import Rotor
-from utils.supporting_data import STATUS_OPTIONS, HELP_ON_ROTOR_NUMBERS_TEXT, UPDATING_INSTRUCTIONS_TEXT
+from utils.supporting_data import STATUS_OPTIONS, HELP_ON_ROTOR_NUMBERS_TEXT, UPDATING_INSTRUCTIONS_TEXT, ROTOR_SIZES
 from typing import Literal
 
 
@@ -73,6 +73,14 @@ rotor_number = input.strip()
 
 # Update rotor information
 if rotor_number:
+    
+    # Validate rotor number format
+    if len(rotor_number) != 5:
+        st.error(f"Invalid rotor number! Must be exactly 5 characters long.")
+        st.stop()
+    if not any(rotor_number.startswith(prefix) for prefix in ROTOR_SIZES):
+        st.error(f"Invalid rotor number! Must start with one of: {', '.join(ROTOR_SIZES)}")
+        st.stop()
 
     is_existing = rotor_number in rotor_dict
     

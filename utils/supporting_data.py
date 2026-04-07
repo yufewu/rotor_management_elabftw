@@ -21,3 +21,5 @@ UPDATING_INSTRUCTIONS_TEXT = """
     4. Click the "Submit" button when you are finished making changes. 
     5. All changes will be synchronized to eLabFTW at the same time.
     """
+
+ROTOR_SIZES = ["07", "13", "31", "32", "40"]
