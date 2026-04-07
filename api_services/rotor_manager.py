@@ -62,7 +62,7 @@ class Rotor:
         try:
             self.get_raw_data()  # This will also update self._response_data
 
-            current_body = self._response_data.get("body", "")
+            current_body = self._response_data.get("body") or ""
             updated_body = self._append_csv_log(current_body, new_rotor_information, override_timestamp)
             
             metadata = parse_data(self._response_data.get("metadata", ""))

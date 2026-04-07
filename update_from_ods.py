@@ -21,7 +21,7 @@ def parse_args():
 RESOURCE_CATEGORY_ID = st.secrets["ELAB_RESOURCE_CATEGORY_ID"]
 
 ODS_FILE = parse_args().filename
-df = pd.read_excel(ODS_FILE, engine="odf")
+df = pd.read_excel(ODS_FILE, engine="odf", dtype={"Rotor number": str})
 
 df['Date_str'] = df['Date'].dt.strftime("%Y-%m-%d").fillna("")
 #df = df.sort_values(by='Date', ascending=True)
