@@ -1,11 +1,15 @@
 import streamlit as st
 import pandas as pd
 from api_services.rotor_manager import Rotor
+from utils.supporting_data import HELP_ON_ROTOR_NUMBERS_TEXT
 
 
 RESOURCE_CATEGORY_ID = st.secrets["ELAB_RESOURCE_CATEGORY_ID"]
 st.set_page_config(page_title="Rotor catalogue", page_icon="🧪", layout="wide")
 st.title("Rotor catalogue")
+
+with st.sidebar:
+    st.info(HELP_ON_ROTOR_NUMBERS_TEXT)
 
 @st.cache_data(ttl=60)
 def refresh_database(category_id: int) -> pd.DataFrame:
@@ -56,7 +60,7 @@ else:
 # Rotor size filter with buttons
 st.write("**Filter by Rotor size:**")
 cols = st.columns(5)
-rotor_size_buttons = ["0.7 mm", "1.3 mm", "3.2 mm thin wall", "3.2 mm thick wall", "4.0 mm"]
+rotor_size_buttons = ["0.7 mm", "1.3 mm", "3.2 mm thick wall", "3.2 mm thin wall", "4.0 mm"]
 rotor_size_mapping = {"0.7 mm": '07', "1.3 mm": '13', "3.2 mm thin wall": '32', "3.2 mm thick wall": '31', "4.0 mm": '40'}
 
 selected_rotor_size = None
