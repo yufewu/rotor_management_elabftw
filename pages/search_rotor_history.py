@@ -3,7 +3,7 @@ import pandas as pd
 import io
 from api_services.rotor_manager import Rotor
 from utils.data_parser import real_name
-from utils.supporting_data import HEADER, END_TAG
+from utils.supporting_data import HEADER, END_TAG, HELP_ON_ROTOR_NUMBERS_TEXT
 
 
 @st.cache_data(ttl=60)
@@ -16,6 +16,8 @@ st.set_page_config(page_title="Rotor history", page_icon="🕰️")
 st.title("🕰️ Search history by rotor number")
 RESOURCE_CATEGORY_ID = st.secrets["ELAB_RESOURCE_CATEGORY_ID"]
 
+with st.sidebar:
+    st.info(HELP_ON_ROTOR_NUMBERS_TEXT)
 
 # Fetch all existing rotors
 try:
@@ -24,7 +26,7 @@ try:
         st.session_state.all_rotors = all_rotors
 
         if 'all_rotors_list' not in st.session_state:
-            all_rotors_list = all_rotors_list = [r.information for r in st.session_state.all_rotors]
+            all_rotors_list = [r.information for r in st.session_state.all_rotors]
             st.session_state.all_rotors_list = all_rotors_list
 
     rotor_dict = {
@@ -39,7 +41,8 @@ except Exception as e:
 
 # Input a rotor number
 input = st.text_input(
-    "Write one rotor number", 
+    "Enter a rotor number to start...", 
+    placeholder="YYXXX",
     key="rotor_num",
 )
 rotor_number = input.strip()

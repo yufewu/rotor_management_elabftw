@@ -78,5 +78,8 @@ def interpret_rotor_response(parsed_response_data: dict) -> dict:
             result[field] = real_name(value)
         else: 
             result[field] = value
+    
+    result["Rotor size"] = result["Rotor number"][:2]
+
         
     return result
