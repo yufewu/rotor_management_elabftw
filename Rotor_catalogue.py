@@ -59,13 +59,20 @@ else:
 
 # Rotor size filter with buttons
 st.write("**Filter by Rotor size:**")
-cols = st.columns(5)
+cols = st.columns(6)
 rotor_size_buttons = ["0.7 mm", "1.3 mm", "3.2 mm thick wall", "3.2 mm thin wall", "4.0 mm"]
 rotor_size_mapping = {"0.7 mm": '07', "1.3 mm": '13', "3.2 mm thin wall": '32', "3.2 mm thick wall": '31', "4.0 mm": '40'}
 
+# Reset button
+with cols[0]:
+    if st.button("all", use_container_width=True):
+        if "selected_rotor_size" in st.session_state:
+            del st.session_state.selected_rotor_size
+        st.rerun()
+
 selected_rotor_size = None
-for col, button_label in zip(cols, rotor_size_buttons):
-    with col:
+for idx, button_label in enumerate(rotor_size_buttons):
+    with cols[idx + 1]:
         if st.button(button_label, use_container_width=True):
             selected_rotor_size = rotor_size_mapping[button_label]
             st.session_state.selected_rotor_size = selected_rotor_size
