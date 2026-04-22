@@ -23,3 +23,9 @@ UPDATING_INSTRUCTIONS_TEXT = """
     """
 
 ROTOR_SIZES = ["07", "13", "31", "32", "40"]
+
+COLORS = {
+    "Empty": "#90EE90",  # Light green
+    "Crashed/Broken/Missing": "#FFB6C6",  # Light red
+    "Reference": "#FFFFE0",  # Light yellow
+}

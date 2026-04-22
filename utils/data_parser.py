@@ -1,6 +1,7 @@
 import json
 import tomllib
 from pathlib import Path
+from .supporting_data import COLORS
 
 
 def get_username_translator() -> dict[str, str]:
@@ -81,5 +82,12 @@ def interpret_rotor_response(parsed_response_data: dict) -> dict:
     
     result["Rotor size"] = result["Rotor number"][:2]
 
-        
     return result
+
+
+def color_row_by_status(row):
+    if row['Status'] in COLORS:
+        color = f"background-color: {COLORS[row['Status']]}"
+    else:
+        color = ""
+    return [color] * len(row)
