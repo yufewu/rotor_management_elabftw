@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from api_services.rotor_manager import Rotor
+from utils.data_parser import color_row_by_status
 from utils.supporting_data import HELP_ON_ROTOR_NUMBERS_TEXT
 
 
@@ -90,4 +91,6 @@ if len(filtered_df) <= 1:
     st.write(f"### Found {len(filtered_df)} rotor. ")
 else:
     st.write(f"### Found {len(filtered_df)} rotors. ")
-st.dataframe(filtered_df, width='stretch', hide_index=True)
+
+styled_df = filtered_df.style.apply(color_row_by_status, axis=1)
+st.dataframe(styled_df, width='stretch', hide_index=True)
