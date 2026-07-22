@@ -5,7 +5,7 @@ description = "A simple and intuitive web-based application for managing laborat
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "elabapi-python>=5.4.2",
+    "elabapi-python>=5.6.1",
     "numpy>=2.4.3",
     "pandas>=2.3.3",
     "streamlit>=1.55.0",
