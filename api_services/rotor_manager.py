@@ -219,7 +219,7 @@ class Rotor:
         api_instance = get_shared_items_api_client()
         
         try:
-            api_response: ApiResponse = api_instance.read_items(cat=f"{category_id}", _preload_content=False)  # type: ignore
+            api_response: ApiResponse = api_instance.read_items(category=category_id, full=1, _preload_content=False)  # type: ignore
             
             items = parse_data(api_response.data.decode("utf-8"))
             

@@ -179,7 +179,7 @@ wheels = [
 
 [[package]]
 name = "elabapi-python"
-version = "5.4.2"
+version = "5.6.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "certifi" },
@@ -187,9 +187,9 @@ dependencies = [
     { name = "six" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/8b/37/8678426c15d5883ada59d54b69f67fb87cbb3a38eff60771241e12020d0e/elabapi_python-5.4.2.tar.gz", hash = "sha256:a6df1f9558591e99f5c2267e6b79963f1cb54e27c0f3c6c8a889e92c08f2328c", size = 133352, upload-time = "2026-03-06T16:20:01.726Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/34/ef/44ad21c10e452e2c13c67a69a8056d0235d205002d9e0b2095c0aef61b88/elabapi_python-5.6.1.tar.gz", hash = "sha256:415e6fd5ddc3bf64f6f6f895b699eba0cc54c3c51d1b47c6fb2a60a6b65c99d6", size = 140549, upload-time = "2026-07-22T12:48:48.464Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9c/f4/c912b845d8263c67f1e8ffa571ceef29af05fb700588006d59a1d5f3580e/elabapi_python-5.4.2-py3-none-any.whl", hash = "sha256:a31dae5cecd4fdd72de0c00e448388698a1ae01ab17426fb58b0009b16c43634", size = 398778, upload-time = "2026-03-06T16:19:59.761Z" },
+    { url = "https://files.pythonhosted.org/packages/70/97/01c88db3ae9d80cf57f4bdd64e4bb1ebe4fa26a8dbc942e9b2a3ad897f41/elabapi_python-5.6.1-py3-none-any.whl", hash = "sha256:1d95dff4d14b60fde7a791d2f8798502b08334451a0cd6610ac8b797e2f4c320", size = 426230, upload-time = "2026-07-22T12:48:47.153Z" },
 ]
 
 [[package]]
@@ -715,7 +715,7 @@ wheels = [
 
 [[package]]
 name = "rotor-management-elabftw"
-version = "0.2.1"
+version = "0.2.2"
 source = { virtual = "." }
 dependencies = [
     { name = "elabapi-python" },
@@ -731,7 +731,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "elabapi-python", specifier = ">=5.4.2" },
+    { name = "elabapi-python", specifier = ">=5.6.1" },
     { name = "numpy", specifier = ">=2.4.3" },
     { name = "pandas", specifier = ">=2.3.3" },
     { name = "streamlit", specifier = ">=1.55.0" },
