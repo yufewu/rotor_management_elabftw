@@ -36,10 +36,9 @@ uv sync
 
 1. Create `.streamlit/secrets.toml` (or use Streamlit Cloud secrets):
 ```toml
-[elab]
-API_KEY = "<your_elab_api_key>"
-API_HOST = "https://<your-elab-instance-url>/api/v2"
-CATEGORY_ID = "<id of the resource template>"
+ELAB_API_KEY = "<your_elab_api_key>"
+ELAB_API_HOST = "https://<your-elab-instance-url>/api/v2"
+ELAB_RESOURCE_CATEGORY_ID = <id of the resource template>
 ```
 
 ### Run the Application
@@ -67,7 +66,7 @@ rotor_management_elabftw/
 ├── utils/                 # Helper functions
 │   └── data_parser.py
 │   └── supporting_data.py
-├── .streamlit/                 # Helper functions
+├── .streamlit/                 # API configuration
 │   └── secrets.toml
 └── pyproject.toml
 └── README.md
@@ -97,5 +96,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Last Updated**: April 2026
+**Last Updated**: August 2026
 ---
